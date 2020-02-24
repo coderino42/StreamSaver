@@ -1,3 +1,5 @@
+var pony = require("web-streams-polyfill/ponyfill");
+
 /* global chrome location ReadableStream define MessageChannel TransformStream */
 
 ((name, definition) => {
@@ -346,7 +348,7 @@
 	return streamSaver;
 
 	// Got this solution from here :
-	async function applyPonies() {
+	function applyPonies() {
 		let ponyReadableStream = false;
 		let ponyWritableStream = !streamSaver.WritableStream;
 
@@ -358,8 +360,6 @@
 		}
 
 		if (ponyReadableStream || ponyWritableStream) {
-			const pony = await import("web-streams-polyfill/ponyfill");
-
 			if (ponyReadableStream) {
 				// eslint-disable-next-line require-atomic-updates
 				streamSaver.ReadableStream = pony.ReadableStream;

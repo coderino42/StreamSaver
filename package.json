@@ -23,5 +23,8 @@
     "bugs": {
         "url": "https://github.com/jimmywarting/StreamSaver.js/issues"
     },
-    "homepage": "https://github.com/jimmywarting/StreamSaver.js#readme"
+    "homepage": "https://github.com/jimmywarting/StreamSaver.js#readme",
+    "dependencies": {
+        "web-streams-polyfill": "^2.1.0"
+    }
 }
