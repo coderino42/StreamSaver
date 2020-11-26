@@ -13,7 +13,7 @@ var pony = require("web-streams-polyfill/ponyfill");
 
 	let mitmTransporter = null;
 	let supportsTransferable = false;
-	const test = fn => {
+	const test = (fn) => {
 		try {
 			fn();
 		} catch (e) {}
@@ -33,7 +33,7 @@ var pony = require("web-streams-polyfill/ponyfill");
 		supported: true,
 		version: { full: "2.0.0", major: 2, minor: 0, dot: 0 },
 		mitm:
-			"https://jimmywarting.github.io/StreamSaver.js/mitm.html?version=2.0.0"
+			"https://jimmywarting.github.io/StreamSaver.js/mitm.html?version=2.0.0",
 	};
 
 	/**
@@ -92,10 +92,10 @@ var pony = require("web-streams-polyfill/ponyfill");
 			},
 			postMessage(...args) {
 				popup.frame.postMessage(...args);
-			}
+			},
 		};
 
-		const onReady = evt => {
+		const onReady = (evt) => {
 			if (evt.source === popup.frame) {
 				popup.loaded = true;
 				window.removeEventListener("message", onReady);
@@ -130,7 +130,7 @@ var pony = require("web-streams-polyfill/ponyfill");
 		Object.defineProperty(streamSaver, "TransformStream", {
 			configurable: false,
 			writable: false,
-			value: TransformStream
+			value: TransformStream,
 		});
 	});
 
@@ -153,7 +153,7 @@ var pony = require("web-streams-polyfill/ponyfill");
 			size: null,
 			pathname: null,
 			writableStrategy: undefined,
-			readableStrategy: undefined
+			readableStrategy: undefined,
 		};
 
 		let bytesWritten = 0; // by StreamSaver.js (not the service worker)
@@ -192,16 +192,12 @@ var pony = require("web-streams-polyfill/ponyfill");
 				transferringReadable: supportsTransferable,
 				pathname:
 					opts.pathname ||
-					Math.random()
-						.toString()
-						.slice(-6) +
-						"/" +
-						filename,
+					Math.random().toString().slice(-6) + "/" + filename,
 				headers: {
 					"Content-Type": "application/octet-stream; charset=utf-8",
 					"Content-Disposition":
-						"attachment; filename*=UTF-8''" + filename
-				}
+						"attachment; filename*=UTF-8''" + filename,
+				},
 			};
 
 			if (opts.size) {
@@ -229,7 +225,7 @@ var pony = require("web-streams-polyfill/ponyfill");
 									if (downloadUrl) {
 										location.href = downloadUrl;
 									}
-								}
+								},
 						  };
 				ts = new streamSaver.TransformStream(
 					transformer,
@@ -241,7 +237,7 @@ var pony = require("web-streams-polyfill/ponyfill");
 				channel.port1.postMessage({ readableStream }, [readableStream]);
 			}
 
-			channel.port1.onmessage = evt => {
+			channel.port1.onmessage = (evt) => {
 				// Service worker sent us a link that we should open.
 				if (evt.data.download) {
 					// Special treatment for popup...
@@ -319,7 +315,7 @@ var pony = require("web-streams-polyfill/ponyfill");
 					close() {
 						if (useBlobFallback) {
 							const blob = new Blob(chunks, {
-								type: "application/octet-stream; charset=utf-8"
+								type: "application/octet-stream; charset=utf-8",
 							});
 							const link = document.createElement("a");
 							link.href = URL.createObjectURL(blob);
@@ -336,7 +332,7 @@ var pony = require("web-streams-polyfill/ponyfill");
 						channel.port1.close();
 						channel.port2.close();
 						channel = null;
-					}
+					},
 				},
 				opts.writableStrategy
 			)
@@ -347,28 +343,16 @@ var pony = require("web-streams-polyfill/ponyfill");
 
 	return streamSaver;
 
-	// Got this solution from here :
+	// https://github.com/jimmywarting/StreamSaver.js/issues/117#issuecomment-577667147
 	function applyPonies() {
-		let ponyReadableStream = false;
-		let ponyWritableStream = !streamSaver.WritableStream;
-
 		try {
 			new ReadableStream();
 		} catch (error) {
 			// This will fail on MS Edge with a `Function expected` exception
-			ponyReadableStream = true;
+			streamSaver.ReadableStream = pony.ReadableStream;
 		}
 
-		if (ponyReadableStream || ponyWritableStream) {
-			if (ponyReadableStream) {
-				// eslint-disable-next-line require-atomic-updates
-				streamSaver.ReadableStream = pony.ReadableStream;
-			}
-
-			if (ponyWritableStream) {
-				// eslint-disable-next-line require-atomic-updates
-				streamSaver.WritableStream = pony.WritableStream;
-			}
-		}
+		if (!streamSaver.WritableStream)
+			streamSaver.WritableStream = pony.WritableStream;
 	}
 });
